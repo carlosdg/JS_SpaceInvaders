@@ -39,6 +39,11 @@ function Ufo (x, y, speed){
 }
 Ufo.prototype.width  = 40;
 Ufo.prototype.height = 13;
+Ufo.prototype.possibleScores = [50, 100, 150, 300];
+Ufo.prototype.getScore = function () {
+   var scoreIndex = Math.floor( Math.random() * 4 );
+   return Ufo.prototype.possibleScores[ scoreIndex ];
+};
 Ufo.prototype.update = function () {
     this.x += this.speed;
 };
@@ -59,8 +64,8 @@ function Alien (alienType, x, y){
     this.y = y;
     this.sprite = 0; // Indicates what sprite to draw
     this.moveDirection = 1; // Indicates movement to the right or left
-    this.width  = this.typeDimensions[alienType][0];
-    this.height = this.typeDimensions[alienType][1];
+    this.width  = this.typeAttributes[alienType][0];
+    this.height = this.typeAttributes[alienType][1];
 }
 Alien.prototype.maxWidth  = 20;
 Alien.prototype.maxHeight = 16;
@@ -69,11 +74,14 @@ Alien.prototype.type = {
     B : 1,
     C : 2
 };
-Alien.prototype.typeDimensions = [
-    [20, 16], // Width and height of type A
-    [20, 16], // Width and height of type B
-    [20, 16]  // Width and height of type C
+Alien.prototype.typeAttributes = [
+    [20, 16, 20], // Width, height and score of type A
+    [20, 16, 30], // Width, height and score of type B
+    [20, 16, 10]  // Width, height and score of type C
 ];
+Alien.prototype.getScore = function () {
+    return this.typeAttributes[ this.alienType ][ 2 ];
+};
 Alien.prototype.update = function (toNewRow){
     // Here we use maxWidth and maxHeight so every alien
     // moves the same amount of pixels

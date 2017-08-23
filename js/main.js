@@ -3,10 +3,8 @@
 /*******************************************************************************
 
     TODO:
-        - Keep track of scores
-        - Have the aliens move faster as time goes by
         - Stop the game when the user loses
-        - Add user lifes
+        - Have the aliens move faster as time goes by
         - Add levels (the game doesn't end until the user loses,
         once all the aliens dies, there have to be a new batch of them)
         - Add the defence elements
@@ -25,7 +23,9 @@ var gameArea = function (){
         cannonBullet,
         keyEventHandler,    // Handles user input to move the cannon or shoot
         currentFrame = 0,   // To keep track of the frame for updating aliens for example
-        aliensFrameToMove = 45;
+        aliensFrameToMove = 45,
+        playerLifes,  // DOM element with the number of user lifes
+        playerScore;  // DOM element containing the score
 
 
     // Need this helper function because we need to construct the aliens
@@ -166,6 +166,9 @@ var gameArea = function (){
                 if ( collisionDetection(cannonBullet.x, cannonBullet.y, cannonBullet.width, cannonBullet.height,
                                         alien.x, alien.y, alien.width, alien.height)
                 ){
+                    // Update score
+                    playerScore.innerHTML = parseInt( playerScore.innerHTML ) + alien.getScore();
+
                     // Remove that alien
                     aliens[i].splice(j,1);
 
@@ -192,6 +195,7 @@ var gameArea = function (){
                                 cannonBullet.width, cannonBullet.height,
                                 ufo.x, ufo.y, ufo.width, ufo.height)
         ){
+            playerScore.innerHTML = parseInt( playerScore.innerHTML ) + ufo.getScore();
             ufo = null;
         }
 
@@ -201,7 +205,9 @@ var gameArea = function (){
                                 alienBullet.width, alienBullet.height,
                                 cannon.x, cannon.y, cannon.width, cannon.height)
         ){
-            alert("You lose");
+            playerLifes.innerHTML = parseInt(playerLifes.innerHTML) - 1;
+            alienBullet = null;
+            // TODO: end game when lifes <= 0
         }
 
     };
@@ -254,13 +260,17 @@ var gameArea = function (){
             canvas.style.backgroundColor = "#EEE";
 
             // Append canvas to document
-            document.body.appendChild(canvas);
+            document.getElementById("container").appendChild(canvas);
 
             // UFO and bullets initialization
             // They will be constructed as needed in the update function
             ufo = null;
             cannonBullet = null;
             alienBullet  = null;
+
+            // Set the reference of the DOM elements for the score and lifes
+            playerLifes = document.getElementById("number-lifes");
+            playerScore = document.getElementById("score");
 
             // Construct aliens
             constructAlienMatrix (Alien.prototype.maxWidth);
@@ -285,4 +295,4 @@ var gameArea = function (){
 
 
 
-gameArea.init(520,432);
+gameArea.init(500,432);
