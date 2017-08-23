@@ -20,10 +20,8 @@ My implementation of the game "Space Invaders" in JavaScript, based on the YouTu
 <h2> Note </h2>
 <p> There are still plenty of features to implement:
     <ul>
-        <li> Keep track of scores </li>
         <li> Have the aliens move faster as time goes by </li>
         <li> Stop the game when the user loses </li>
-        <li> Add user lifes </li>
         <li> Add levels (the game doesn't end until the user loses, once all the aliens dies, there have to be a new batch of them) </li>
         <li> Add the defence elements </li>
     </ul>
