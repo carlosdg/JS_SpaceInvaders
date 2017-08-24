@@ -7,9 +7,10 @@
     display: grid;
     grid-template:
         " . score  lifes  . "
-        " . canvas canvas . ";
+        " . canvas canvas . "
+        " . alert  alert  . ";
     grid-template-columns: 1fr 250px 250px 1fr;
-    grid-gap: 1px;
+    grid-row-gap: 10px;
 }
 canvas{
     grid-area: canvas
@@ -20,4 +21,11 @@ canvas{
 }
 #player-score{
     grid-area: score;
+}
+#alert-box{
+    grid-area: alert;
+    display: none;
+    background-color: #F99;
+    padding: 1%;
+    border-radius: 1px;
 }
