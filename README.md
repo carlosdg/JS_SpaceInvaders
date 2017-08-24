@@ -18,10 +18,8 @@ My implementation of the game "Space Invaders" in JavaScript, based on the YouTu
   <p> Use the space bar to shoot. You can only shoot a bullet at a time. You can shoot again when the bullet dissapears from the canvas, or you can let the space bar pressed to shoot as soon as possible </p>
 
 <h2> Note </h2>
-<p> There are still plenty of features to implement:
+<p> There are still plenty of features to implement, some of them are:
     <ul>
-        <li> Have the aliens move faster as time goes by </li>
-        <li> Stop the game when the user loses </li>
         <li> Add levels (the game doesn't end until the user loses, once all the aliens dies, there have to be a new batch of them) </li>
         <li> Add the defence elements </li>
     </ul>
