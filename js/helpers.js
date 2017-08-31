@@ -42,7 +42,7 @@ Ufo.prototype.height = 13;
 Ufo.prototype.possibleScores = [50, 100, 150, 300];
 Ufo.prototype.getScore = function () {
    var scoreIndex = Math.floor( Math.random() * 4 );
-   return Ufo.prototype.possibleScores[ scoreIndex ];
+   return Ufo.prototype.possibleScores[ scoreIndex ]
 };
 Ufo.prototype.update = function () {
     this.x += this.speed;
@@ -58,12 +58,12 @@ Ufo.prototype.draw = function (context) {
 
 
 
-function Alien (alienType, x, y){
+function Alien (alienType, x, y, moveDir){
     this.alienType = alienType;
     this.x = x;
     this.y = y;
     this.sprite = 0; // Indicates what sprite to draw
-    this.moveDirection = 1; // Indicates movement to the right or left
+    this.moveDirection = moveDir; // Indicates movement to the right or left
     this.width  = this.typeAttributes[alienType][0];
     this.height = this.typeAttributes[alienType][1];
 }
@@ -75,12 +75,12 @@ Alien.prototype.type = {
     C : 2
 };
 Alien.prototype.typeAttributes = [
-    [20, 16, 20], // Width, height and score of type A
-    [20, 16, 30], // Width, height and score of type B
+    [20, 16, 30], // Width, height and score of type A
+    [20, 16, 20], // Width, height and score of type B
     [20, 16, 10]  // Width, height and score of type C
 ];
 Alien.prototype.getScore = function () {
-    return this.typeAttributes[ this.alienType ][ 2 ];
+    return Alien.prototype.typeAttributes[ this.alienType ][ 2 ];
 };
 Alien.prototype.update = function (toNewRow){
     // Here we use maxWidth and maxHeight so every alien
@@ -90,7 +90,7 @@ Alien.prototype.update = function (toNewRow){
         this.y += this.maxHeight;
     }
     else{
-        this.x += this.maxWidth/2 * this.moveDirection;
+        this.x += this.maxWidth * 0.6 * this.moveDirection;
     }
     this.sprite = (this.sprite + 1) % 2;
 }
@@ -176,4 +176,32 @@ function collisionDetection (ax, ay, aWidth, aHeight, bx, by, bWidth, bHeight){
             ax >= bx  &&
             ax + aWidth  <=  bx + bWidth
     );
+}
+
+
+// This function returns a function to interact with the alert-box DOM element
+// to display messages to the user
+function alertMessageToDom(){
+    // These variables act as private, to cache the DOM element
+    var alertBox  = document.getElementsByClassName("alert-box")[0];
+    var timeoutId = null;
+
+    return (function (messageToDisplay, time){
+        // Clear timeout if there is any
+        if (timeoutId !== null){
+            clearTimeout(timeoutId);
+        }
+
+        // Display message
+        alertBox.innerHTML = messageToDisplay;
+        alertBox.id = "alert-display";
+
+        // Set timeout to erase message in case it is temporal
+        if (time){
+            timeoutId = setTimeout(function () {
+                alertBox.id = "alert-hidden";
+                timeoutId = null;
+            }, time);
+        }
+    });
 }

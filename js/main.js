@@ -3,41 +3,13 @@
 /*******************************************************************************
 
     TODO:
-        - Add levels (the game doesn't end until the user loses,
-        once all the aliens dies, there have to be a new batch of them)
+        - Cancel requestAnimationFrame when the game ends
         - Let the player pause the game
         - Add the defence elements
         - Improve cannon bullet collision detection
         - Improve the event handler
 
 *******************************************************************************/
-
-// This function returns a function to interact with the alert-box DOM element
-// to display messages to the user
-function alertMessageToDom(){
-    // These variables act as private, to cache the DOM element
-    var alertBox  = document.getElementById("alert-box");
-    var timeoutId = null;
-
-    return (function (messageToDisplay, time){
-        // Clear timeout if there is any
-        if (timeoutId !== null){
-            clearTimeout(timeoutId);
-        }
-
-        // Display message
-        alertBox.innerHTML = messageToDisplay;
-        alertBox.style.display = "block";
-
-        // Set timeout to erase message in case it is temporal
-        if (time){
-            timeoutId = setTimeout(function () {
-                alertBox.style.display = "none";
-                timeoutId = null;
-            }, time);
-        }
-    });
-}
 
 var gameArea = function (){
 
@@ -51,17 +23,20 @@ var gameArea = function (){
         keyEventHandler,    // Handles user input to move the cannon or shoot
         currentFrame = 0,   // To keep track of the frame for updating aliens
         aliensFrameToMove = 45,
+        aliensMinNumberFramesToMove = 10,   // Need a minimum because "aliensFrameToMove" will decrease over time
+        numberAliensMoveToIncreaseSpeed = 15,
         playerLifes,  // DOM element with the number of user lifes
         playerScore,  // DOM element containing the score
         gameEnded,    // Boolean that stops the recursive call of requestAnimationFrame
         gamePaused = false, // Boolean that pauses the game (not really, what it does is
                             // prevent the run loop to update and draw the game)
-        alertMessage = alertMessageToDom();
+        alertMessage = alertMessageToDom(), // Function to alert messages to the user using a div
+        currentAliensOffsetY;
 
     // Need this helper function because we need to construct the aliens
     // in the init function as well as in the update function when all die
     // @param yOffset: where to locate the aliens starting from the top of the screen
-    var constructAlienMatrix = function (yOffset){
+    var constructAlienMatrix = function (yOffset, dir){
         // Auxiliar variables, we use maxWidth and maxHeight to place
         // every alien in equal distance
         var maxAlienWidth = Alien.prototype.maxWidth,
@@ -80,8 +55,11 @@ var gameArea = function (){
             for (var j = 0; j < numAliensPerRow; ++j){
                 aliens[i].push(
                     new Alien(  alienRows[i],  // Alien type for this row
-                                maxAlienWidth  * 1.2 * j, // Initial x position
-                                maxAlienHeight * 1.5 * i + yOffset) // Initial y position
+                                dir >= 1?      // Initial x position. It depends on the movement of the aliens
+                                    (maxAlienWidth  * 1.2 * j) :    // Far left on the screen if they are moving to the right
+                                    canvas.width - (maxAlienWidth  * 1.2 * (numAliensPerRow - j)),  // On the left otherwise
+                                maxAlienHeight * 1.5 * i + yOffset, // Initial y position
+                                dir  )
                 );
             }
         }
@@ -104,11 +82,11 @@ var gameArea = function (){
             }
 
             // If the most right alien is near the edge we have to go down a row
-            if ((alienInLastCol.x + alienInLastCol.maxWidth*1.5) >= canvas.width){
+            if ((alienInLastCol.x + alienInLastCol.maxWidth*1.2) >= canvas.width){
                 result = true;
             }
         }
-        // Aliens are moving to the left, similar to the above code
+        // Aliens are moving to the left, similar to the code above
         else{
             alienInLastCol = aliens[0][0];
             for (var i = 1, len = aliens.length; i < len; ++i){
@@ -117,7 +95,7 @@ var gameArea = function (){
                     alienInLastCol = aux;
                 }
             }
-            if (alienInLastCol.x < alienInLastCol.maxWidth){
+            if (alienInLastCol.x <= 0){
                 result = true;
             }
         }
@@ -125,6 +103,17 @@ var gameArea = function (){
         return result;
 
     };
+
+    var aliensInvaded = function(){
+        // Check if aliens reached a height near the cannon (They invaded the planet D:)
+        // Each alien take a height of maxHeight*1.5, so we can divide the canvas in
+        // 'maxHeight*1.5' equal positions. The cannon will be in the last one, so once the aliens reach
+        // one after that and try to go down, we consider it game over
+        var alienInLastRow = aliens[ aliens.length -1 ][ 0 ];
+        var canvasPositions = alienInLastRow.maxHeight * 1.5;
+
+        return ( alienInLastRow.y + alienInLastRow.maxHeight >= ((canvasPositions-1)/canvasPositions)*canvas.height );
+    }
 
     var update = function(){
         // Update and draw cannon given the user input
@@ -156,35 +145,32 @@ var gameArea = function (){
                 }
             }
             if (moveDownRow){
-                // Check if aliens reached a height near the cannon (They invaded the planet D:)
-                // Each alien take a height of maxHeight*1.5, so we can divide the canvas in
-                // 'maxHeight*1.5' equal positions. The cannon will be in the last one, so once the aliens reach
-                // one after that and try to go down, we consider it game over
-                var alienInLastRow = aliens[ aliens.length -1 ][ 0 ];
-                var canvasPositions = alienInLastRow.maxHeight * 1.5;
-                if ( alienInLastRow.y + alienInLastRow.maxHeight >= ((canvasPositions-1)/canvasPositions)*canvas.height ){
+                // Update current aliens y offset
+                currentAliensOffsetY += Alien.prototype.maxHeight;
+                if ( aliensInvaded() ){
                     gameEnded = true;
                     alertMessage("GAME OVER: Aliens invaded the planet.");
                 }
             }
         }
 
-        // Every 10 moves of the aliens we increase the "speed" of them by decreasing
-        // their frame to move. Also we need to reset the current frame counter.
-        // Otherwise, the update could happend after expected
-        if (currentFrame % (aliensFrameToMove*10)  === 0  &&  aliensFrameToMove > 10) {
+        // Every "numberAliensMoveToIncreaseSpeed" moves of the aliens we increase
+        // the "speed" of them by decreasing their frame to move. Also we need to
+        // reset the current frame counter. Otherwise, the update could happend before expected
+        if ( (currentFrame % (aliensFrameToMove * numberAliensMoveToIncreaseSpeed))  === 0  &&
+             (aliensFrameToMove > aliensMinNumberFramesToMove)
+        ){
             aliensFrameToMove -= 1;
             currentFrame = 0;
         }
 
-        // Check bullet creation
-        // Cannon bullet check
+        // Cannon bullet construction check
         if ( cannonBullet === null && keyEventHandler.isSpacePressed() ){
             cannonBullet = new Bullet (cannon.x + cannon.width/2 - Bullet.prototype.width/2,
                                        cannon.y + cannon.height/2,
                                        -6);
         }
-        // Alien bullet check
+        // Alien bullet construction check
         if ( alienBullet === null ){
             // The alien bullet will be shooted from a random alien
             var i = Math.floor(Math.random() * aliens.length),
@@ -195,10 +181,10 @@ var gameArea = function (){
                                       4);
         }
 
-        // Update bullets
         // cannonBullet update
         if (cannonBullet !== null){
             cannonBullet.update();
+            // If it went off the canvas...
             if (cannonBullet.y + cannonBullet.height < 0){
                 cannonBullet = null;
             }
@@ -206,6 +192,7 @@ var gameArea = function (){
         // alienBullet update
         if (alienBullet !== null){
             alienBullet.update();
+            // If it went off the canvas...
             if (alienBullet.y >= canvas.height){
                 alienBullet = null;
             }
@@ -213,18 +200,21 @@ var gameArea = function (){
 
         // Check bullets collision with aliens (brute way)
         for (var i = 0, numRows = aliens.length; cannonBullet !== null &&  i < numRows; ++i){
-            for (var j = 0, numCols = aliens[i].length; j < numCols; ++j){
+            for (var j = 0, numCols = aliens[i].length; cannonBullet !== null && j < numCols; ++j){
                 var alien = aliens[i][j];
-                if ( collisionDetection(cannonBullet.x, cannonBullet.y, cannonBullet.width, cannonBullet.height,
+                // We will only enter this if once. This is because once entered we set to null cannonBullet,
+                // That is the reason of the checks in the loops
+                if ( collisionDetection (cannonBullet.x, cannonBullet.y, cannonBullet.width, cannonBullet.height,
                                         alien.x, alien.y, alien.width, alien.height)
                 ){
                     // Update score
                     playerScore.innerHTML = parseInt( playerScore.innerHTML ) + alien.getScore();
 
-                    // Remove that alien
-                    aliens[i].splice(j,1);
+                    // Remove that alien and cache the direction for later if needed
+                    // to know aliens direction for the new batch of them
+                    let aliensDirection = aliens[i].splice(j,1)[0].moveDirection;
 
-                    // If it was the last alien in that row, remove the row also
+                    // If it was the last alien in that row, also remove the row
                     if (aliens[i].length === 0){
                         aliens.splice(i,1);
                     }
@@ -232,12 +222,20 @@ var gameArea = function (){
                     // Remove the bullet
                     cannonBullet = null;
 
-                    // Check win condition
-                    // TODO: create new batch of aliens
+                    // If every alien is dead, we create a new batch of them
                     if (aliens.length === 0){
-                        alertMessage("You win");
+                        constructAlienMatrix( currentAliensOffsetY, aliensDirection);
+
+                        // Check if they invaded
+                        if ( aliensInvaded() ){
+                            gameEnded = true;
+                            alertMessage("GAME OVER: Aliens invaded the planet.");
+                        }
+                        else{
+                            playerLifes.innerHTML = parseInt(playerLifes.innerHTML) + 3;
+                            alertMessage("You defeated that batch of aliens, here you have 3 extra lifes", 3000);
+                        }
                     }
-                    break;
                 }
             }
         }
@@ -305,7 +303,6 @@ var gameArea = function (){
     };
 
     var run = function(){
-
         if ( !(gamePaused || gameEnded) ){
             // Update currentFrame counter
             currentFrame += 1;
@@ -344,8 +341,9 @@ var gameArea = function (){
             playerLifes = document.getElementById("number-lifes");
             playerScore = document.getElementById("score");
 
-            // Construct aliens
-            constructAlienMatrix (Alien.prototype.maxHeight * 1.5);
+            // Construct aliens for the first time
+            currentAliensOffsetY = Alien.prototype.maxHeight * 1.5;
+            constructAlienMatrix (currentAliensOffsetY, 1);
 
             // Construct cannon
             cannon = new Cannon (canvasWidth / 2, // x position in canvas
@@ -358,7 +356,7 @@ var gameArea = function (){
             window.addEventListener("keydown", keyEventHandler.handleKeyDownEvent);
             window.addEventListener("keyup", keyEventHandler.handleKeyUpEvent);
 
-            requestAnimationFrame( run );
+            run();
         }
     });
 }();

@@ -9,7 +9,7 @@ My implementation of the game "Space Invaders" in JavaScript, based on the YouTu
 
 <h2> Tested on: </h2>
 <ul>
-  <li>	Google Chrome   - 60.0.3112.101  </li>
+  <li>	Google Chrome   - 60.0.3112.113  </li>
   <li>  Mozilla Firefox - 55.0.2         </li>
 </ul>
 
@@ -17,10 +17,7 @@ My implementation of the game "Space Invaders" in JavaScript, based on the YouTu
   <p> Use the arrow keys (<- & ->) to move the cannon. </p>
   <p> Use the space bar to shoot. You can only shoot a bullet at a time. You can shoot again when the bullet dissapears from the canvas, or you can let the space bar pressed to shoot as soon as possible </p>
 
-<h2> Note </h2>
-<p> There are still plenty of features to implement, some of them are:
-    <ul>
-        <li> Add levels (the game doesn't end until the user loses, once all the aliens dies, there have to be a new batch of them) </li>
-        <li> Add the defence elements </li>
-    </ul>
+<h2> Update </h2>
+<p>
+    Most of the game is currently implemented. The only thing about the game itself left are the defences. After that there are some more things that I want to improve, like the collision detection. And I want to add some extra features like letting the user pause the game explicitly (right now it can be paused by going to another tab thanks to requestAnimationFrame).
 </p>

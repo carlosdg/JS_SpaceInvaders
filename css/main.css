@@ -22,10 +22,22 @@ canvas{
 #player-score{
     grid-area: score;
 }
-#alert-box{
+.alert-box{
     grid-area: alert;
-    display: none;
-    background-color: #F99;
-    padding: 1%;
+    background-color: #FCC;
     border-radius: 1px;
+    transition: .5s;
+    padding: 1%;
+}
+#alert-hidden{
+    transform: scale(0);
+    /*/ For old browsers /*/
+    -ms-transform: scale(0);
+    -webkit-transform: scale(0);
+}
+#alert-display{
+    transform: scale(1);
+    /*/ For old browsers /*/
+    -ms-transform: scale(1);
+    -webkit-transform: scale(1);
 }
