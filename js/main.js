@@ -22,7 +22,7 @@ var gameArea = function (){
         cannonBullet,
         keyEventHandler,    // Handles user input to move the cannon or shoot
         currentFrame = 0,   // To keep track of the frame for updating aliens
-        aliensFrameToMove = 45,
+        aliensFrameToMove = 35,
         aliensMinNumberFramesToMove = 10,   // Need a minimum because "aliensFrameToMove" will decrease over time
         numberAliensMoveToIncreaseSpeed = 15,
         playerLifes,  // DOM element with the number of user lifes
@@ -56,8 +56,8 @@ var gameArea = function (){
                 aliens[i].push(
                     new Alien(  alienRows[i],  // Alien type for this row
                                 dir >= 1?      // Initial x position. It depends on the movement of the aliens
-                                    (maxAlienWidth  * 1.2 * j) :    // Far left on the screen if they are moving to the right
-                                    canvas.width - (maxAlienWidth  * 1.2 * (numAliensPerRow - j)),  // On the left otherwise
+                                    (maxAlienWidth  * 1.3 * j + maxAlienWidth*0.3) :    // Far left on the screen if they are moving to the right
+                                    canvas.width - (maxAlienWidth  * 1.3 * (numAliensPerRow - j)) + maxAlienWidth*0.3,  // On the left otherwise
                                 maxAlienHeight * 1.5 * i + yOffset, // Initial y position
                                 dir  )
                 );
@@ -82,7 +82,7 @@ var gameArea = function (){
             }
 
             // If the most right alien is near the edge we have to go down a row
-            if ((alienInLastCol.x + alienInLastCol.maxWidth*1.2) >= canvas.width){
+            if ((alienInLastCol.x + alienInLastCol.maxWidth*1.3) >= canvas.width){
                 result = true;
             }
         }
@@ -95,7 +95,7 @@ var gameArea = function (){
                     alienInLastCol = aux;
                 }
             }
-            if (alienInLastCol.x <= 0){
+            if (alienInLastCol.x <= alienInLastCol.maxWidth*0.3){
                 result = true;
             }
         }
@@ -212,7 +212,7 @@ var gameArea = function (){
 
                     // Remove that alien and cache the direction for later if needed
                     // to know aliens direction for the new batch of them
-                    let aliensDirection = aliens[i].splice(j,1)[0].moveDirection;
+                    var aliensDirection = aliens[i].splice(j,1)[0].moveDirection;
 
                     // If it was the last alien in that row, also remove the row
                     if (aliens[i].length === 0){

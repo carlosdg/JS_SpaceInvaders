@@ -90,7 +90,7 @@ Alien.prototype.update = function (toNewRow){
         this.y += this.maxHeight;
     }
     else{
-        this.x += this.maxWidth * 0.6 * this.moveDirection;
+        this.x += this.maxWidth * 0.3 * this.moveDirection;
     }
     this.sprite = (this.sprite + 1) % 2;
 }
