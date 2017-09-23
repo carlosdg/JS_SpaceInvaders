@@ -26,7 +26,7 @@ Most of the game is currently implemented. The only thing about the game itself 
 
 
 ## Demo
-You can try the game at [the github web page of this project](https://carlosdg.github.io/SpaceInvadersGame/)
+You can try the game at [the github web page of this project](https://carlosdg.github.io/Martians/)
 
 
 ## License
